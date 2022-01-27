@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "wordle_state=default": { "model": "wordlemod:block/wordle_block_enter" },
+        "wordle_state=right": { "model": "wordlemod:block/wordle_block_enter_right" },
+        "wordle_state=exist": { "model": "wordlemod:block/wordle_block_enter_exist" }
+    }
+}
