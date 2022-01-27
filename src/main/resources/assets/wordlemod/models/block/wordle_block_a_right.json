@@ -1,0 +1,6 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "wordlemod:wordle_block_a_right"
+    }
+}
