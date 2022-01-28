@@ -1,6 +1,7 @@
 package cc.inoki.wordle;
 
 import java.util.Optional;
+import java.util.HashSet;
 
 import javax.annotation.Nullable;
 
@@ -77,12 +78,60 @@ public class WordleBlock extends Block {
         }
     }
 
+    private void updateBlockStateByWordle(String wordToMatch, World worldIn, BlockPos pos, WordleMatchedDirection dir) {
+        int length = wordToMatch.length();
+        
+        HashSet<Integer> letterSet = new HashSet(length);
+        for (int i = 0; i < length; i++) {
+            letterSet.add((int)wordToMatch.charAt(i));
+        }
+
+        for (int j = 1; j <= length; j++) {
+            BlockPos detectPos;
+            switch (dir) {
+                case EAST:
+                    detectPos = pos.east(j);
+                    break;
+                case WEST:
+                    detectPos = pos.west(j);
+                    break;
+                case SOUTH:
+                    detectPos = pos.south(j);
+                    break;
+                case NORTH:
+                    detectPos = pos.north(j);
+                    break;
+                default:
+                    detectPos = BlockPos.ZERO;
+                    break;
+            }
+
+            Optional<Integer> wordleCharState = worldIn.getBlockState(detectPos).getOptionalValue(WORDLE_CHAR);
+            if (wordleCharState.isPresent()) {
+                if (wordleCharState.get().intValue() == (int)wordToMatch.charAt(length - j)) {
+                    // Matched
+                    BlockState state = worldIn.getBlockState(detectPos);
+                    state = state.setValue(WORDLE_STATE, WordleAlphabetState.CORRECT);
+                    worldIn.setBlockAndUpdate(detectPos, state);
+                } else {
+                    // Test if it exists
+                    if (letterSet.contains(wordleCharState.get().intValue())) {
+                        // Exist
+                        BlockState state = worldIn.getBlockState(detectPos);
+                        state = state.setValue(WORDLE_STATE, WordleAlphabetState.EXIST);
+                        worldIn.setBlockAndUpdate(detectPos, state);
+                    }
+                }
+            }
+        }
+    }
+
     private WordleMatchedDirection findAndSetWordleBlock(String wordToMatch, World worldIn, BlockPos pos) {
         int length = wordToMatch.length();
         if (length == 0) {
             return WordleMatchedDirection.NOT_MATCHED;
         }
-        // TODO: Update the first unmatched
+        // Update the first unmatched
         int matchedDirectionCount = 0;
 
         // Find the word coming from east
@@ -95,6 +144,7 @@ public class WordleBlock extends Block {
                 if (wordleCharState.get().intValue() != (int)wordToMatch.charAt(length - j)) {
                     allOK = false;
                 }
+                matchedDirectionCount++;
             } else {
                 allOK = false;
                 break;
@@ -104,8 +154,10 @@ public class WordleBlock extends Block {
             LOGGER.info("Word matched from east");
             return WordleMatchedDirection.EAST;
         }
+        if (matchedDirectionCount == length) updateBlockStateByWordle(wordToMatch, worldIn, pos, WordleMatchedDirection.EAST);
 
         // Find the word coming from west
+        matchedDirectionCount = 0;
         allOK = true;
         for (int j = 1; j <= length; j++) {
             BlockPos detectPos = pos.west(j);
@@ -115,6 +167,7 @@ public class WordleBlock extends Block {
                 if (wordleCharState.get().intValue() != (int)wordToMatch.charAt(length - j)) {
                     allOK = false;
                 }
+                matchedDirectionCount++;
             } else {
                 allOK = false;
                 break;
@@ -124,8 +177,10 @@ public class WordleBlock extends Block {
             LOGGER.info("Word matched from west");
             return WordleMatchedDirection.WEST;
         }
+        if (matchedDirectionCount == length) updateBlockStateByWordle(wordToMatch, worldIn, pos, WordleMatchedDirection.WEST);
 
         // Find the word coming from south
+        matchedDirectionCount = 0;
         allOK = true;
         for (int j = 1; j <= length; j++) {
             BlockPos detectPos = pos.south(j);
@@ -135,6 +190,7 @@ public class WordleBlock extends Block {
                 if (wordleCharState.get().intValue() != (int)wordToMatch.charAt(length - j)) {
                     allOK = false;
                 }
+                matchedDirectionCount++;
             } else {
                 allOK = false;
                 break;
@@ -144,8 +200,10 @@ public class WordleBlock extends Block {
             LOGGER.info("Word matched from south");
             return WordleMatchedDirection.SOUTH;
         }
+        if (matchedDirectionCount == length) updateBlockStateByWordle(wordToMatch, worldIn, pos, WordleMatchedDirection.SOUTH);
 
         // Find the word coming from north
+        matchedDirectionCount = 0;
         allOK = true;
         for (int j = 1; j <= length; j++) {
             BlockPos detectPos = pos.north(j);
@@ -155,6 +213,7 @@ public class WordleBlock extends Block {
                 if (wordleCharState.get().intValue() != (int)wordToMatch.charAt(length - j)) {
                     allOK = false;
                 }
+                matchedDirectionCount++;
             } else {
                 allOK = false;
                 break;
@@ -164,6 +223,7 @@ public class WordleBlock extends Block {
             LOGGER.info("Word matched from north");
             return WordleMatchedDirection.NORTH;
         }
+        if (matchedDirectionCount == length) updateBlockStateByWordle(wordToMatch, worldIn, pos, WordleMatchedDirection.NORTH);
 
         return WordleMatchedDirection.NOT_MATCHED;
     }
