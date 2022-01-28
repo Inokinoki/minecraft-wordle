@@ -235,13 +235,11 @@ public class WordleBlock extends Block {
             switch (state.getValue(WORDLE_STATE)) {
                 case DEFAULT:
                     // Find and update the word
-                    WordleMatchedDirection direction = this.findAndSetWordleBlock("aaaaa", worldIn, pos);
+                    WordleMatchedDirection direction = this.findAndSetWordleBlock("inoki", worldIn, pos);
                     if (direction != WordleMatchedDirection.NOT_MATCHED) {
-                        updateSuccessWordleBlockState("aaaaa", worldIn, pos, direction);
+                        updateSuccessWordleBlockState("inoki", worldIn, pos, direction);
                         state = state.setValue(WORDLE_STATE, WordleAlphabetState.CORRECT);
                         worldIn.setBlockAndUpdate(pos, state);
-                    } else {
-                        LOGGER.info("Not yet matched");
                     }
                     break;
                 default:
