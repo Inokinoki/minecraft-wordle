@@ -232,12 +232,14 @@ public class WordleBlock extends Block {
         LOGGER.info("Block set at " + pos.toShortString() + " " + state.toString());
         if (state.getValue(WORDLE_CHAR) > (int)'z') {
             // Only handle when enter clicked
+            String word = WordleManager.getSharedInstance().getTodayWordle();
+            LOGGER.info(word);
             switch (state.getValue(WORDLE_STATE)) {
                 case DEFAULT:
                     // Find and update the word
-                    WordleMatchedDirection direction = this.findAndSetWordleBlock("inoki", worldIn, pos);
+                    WordleMatchedDirection direction = this.findAndSetWordleBlock(word, worldIn, pos);
                     if (direction != WordleMatchedDirection.NOT_MATCHED) {
-                        updateSuccessWordleBlockState("inoki", worldIn, pos, direction);
+                        updateSuccessWordleBlockState(word, worldIn, pos, direction);
                         state = state.setValue(WORDLE_STATE, WordleAlphabetState.CORRECT);
                         worldIn.setBlockAndUpdate(pos, state);
                     }
